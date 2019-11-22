@@ -49,7 +49,7 @@ void DepthGroundRemover::OnNewObjectReceived(const Cloud& cloud,
   Timer total_timer;
   auto angle_image = CreateAngleImage(depth_image);
   auto smoothed_image = ApplySavitskyGolaySmoothing(angle_image, _window_size);
-  auto no_ground_image = ZeroOutGroundBFS(depth_image, smoothed_image,
+  auto no_ground_image = ZeroOutGroundBFS(cloud,depth_image, smoothed_image,
                                           _ground_remove_angle, _window_size);
   fprintf(stderr, "INFO: Ground removed in %lu us\n", total_timer.measure());
   cloud_copy.projection_ptr()->depth_image() = no_ground_image;
@@ -74,7 +74,7 @@ Mat DepthGroundRemover::ZeroOutGround(const cv::Mat& image,
   return res;
 }
 
-Mat DepthGroundRemover::ZeroOutGroundBFS(const cv::Mat& image,
+Mat DepthGroundRemover::ZeroOutGroundBFS(const Cloud& cloud,const cv::Mat& image,
                                          const cv::Mat& angle_image,
                                          const Radians& threshold,
                                          int kernel_size) const {
@@ -109,14 +109,32 @@ Mat DepthGroundRemover::ZeroOutGroundBFS(const cv::Mat& image,
   Mat kernel = GetUniformKernel(kernel_size, CV_8U);
   Mat dilated = Mat::zeros(label_image_ptr->size(), label_image_ptr->type());
   cv::dilate(*label_image_ptr, dilated, kernel);
-  for (int r = 0; r < dilated.rows; ++r) {
-    for (int c = 0; c < dilated.cols; ++c) {
-      if (dilated.at<uint16_t>(r, c) == 0) {
-        // all unlabeled points are non-ground
-        res.at<float>(r, c) = image.at<float>(r, c);
+  for (int r = 0; r < dilated.rows; ++r)
+  {
+      for (int c = 0; c < dilated.cols; ++c)
+      {
+          if (dilated.at<uint16_t>(r, c) == 0)
+          {
+            // all unlabeled points are non-ground
+            res.at<float>(r, c) = image.at<float>(r, c);
+          }
+          if (dilated.at<uint16_t>(r, c) != 0)
+          {
+              const auto& point_container = cloud.projection_ptr()->at(r, c);
+              if (point_container.IsEmpty())
+              {
+                  // this is ok, just continue, nothing interesting here, no points.
+                  continue;
+              }
+              for (const auto& point_idx : point_container.points())
+              {
+                  const auto& point = cloud.points()[point_idx];
+                  _groundClusters->push_back(point);
+              }
+          }
       }
-    }
   }
+//  std::cout << "groundcloud size:" << _groundClusters->size() << std::endl;
   return res;
 }
 

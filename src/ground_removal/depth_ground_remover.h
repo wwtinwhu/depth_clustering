@@ -49,7 +49,10 @@ class DepthGroundRemover : public AbstractClient<Cloud>,
         SenderT{SenderType::STREAMER},
         _params{params},
         _window_size{window_size},
-        _ground_remove_angle{ground_remove_angle} {}
+        _ground_remove_angle{ground_remove_angle} {
+      auto ptr = Cloud::Ptr(new Cloud);
+      _groundClusters = ptr ;
+  }
   virtual ~DepthGroundRemover() {}
 
   /**
@@ -62,7 +65,10 @@ class DepthGroundRemover : public AbstractClient<Cloud>,
    */
   void OnNewObjectReceived(const Cloud& cloud, const int sender_id) override;
 
- protected:
+  Cloud::Ptr _groundClusters = nullptr;
+  Cloud::Ptr getGroundPointCluster(){ return _groundClusters;}
+
+protected:
   /**
    * @brief      Zero out all pixels that belong to ground
    *
@@ -75,7 +81,7 @@ class DepthGroundRemover : public AbstractClient<Cloud>,
   cv::Mat ZeroOutGround(const cv::Mat& image, const cv::Mat& angle_image,
                         const Radians& threshold) const;
 
-  cv::Mat ZeroOutGroundBFS(const cv::Mat& image, const cv::Mat& angle_image,
+  cv::Mat ZeroOutGroundBFS(const Cloud& cloud, const cv::Mat& image, const cv::Mat& angle_image,
                            const Radians& threshold, int kernel_size) const;
 
   /**

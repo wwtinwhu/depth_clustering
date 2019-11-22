@@ -30,3 +30,7 @@
 /doc/latex/
 
 notebooks/.ipynb_checkpoints/*
+
+cmake-build-debug/
+
+.idea/

@@ -32,6 +32,7 @@ class RichPoint {
       std::vector<RichPoint, Eigen::aligned_allocator<RichPoint>>;
 
   RichPoint() {}
+  explicit RichPoint(float x, float y, float z, float intensity, int justToDistinguish) : _point(x, y, z),_intensity(intensity) {}
   explicit RichPoint(float x, float y, float z) : _point(x, y, z) {}
   explicit RichPoint(float x, float y, float z, uint16_t ring)
       : _point{x, y, z}, _ring{ring} {}
@@ -42,6 +43,7 @@ class RichPoint {
   inline float x() const { return _point.x(); }
   inline float y() const { return _point.y(); }
   inline float z() const { return _point.z(); }
+  inline float intensity() const {return _intensity;}
 
   inline uint16_t& ring() { return _ring; }
   inline float& x() { return _point.x(); }
@@ -66,6 +68,7 @@ class RichPoint {
 
  private:
   Eigen::Vector3f _point = Eigen::Vector3f::Zero();
+  float _intensity = 0;
   uint16_t _ring = 0;
 };
 

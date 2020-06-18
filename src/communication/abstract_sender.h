@@ -78,7 +78,7 @@ class AbstractSender : public virtual Identifiable {
       exit(EXIT_FAILURE);
     }
     _clients[client->id()] = client;
-    fprintf(stderr,
+/*    fprintf(stderr,
             "\n"
             " ===================== Setting Connection =====================\n"
             "|| Sender: %s (id: %d)\n"
@@ -88,7 +88,7 @@ class AbstractSender : public virtual Identifiable {
             "|| Client: %s (id: %d)\n"
             " ==============================================================\n",
             this->guess_class_name().c_str(), this->id(), this->type(),
-            client->guess_class_name().c_str(), client->id());
+            client->guess_class_name().c_str(), client->id());*/
   }
 
   /**

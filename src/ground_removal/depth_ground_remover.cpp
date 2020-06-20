@@ -109,6 +109,7 @@ Mat DepthGroundRemover::ZeroOutGroundBFS(const Cloud& cloud,const cv::Mat& image
   Mat kernel = GetUniformKernel(kernel_size, CV_8U);
   Mat dilated = Mat::zeros(label_image_ptr->size(), label_image_ptr->type());
   cv::dilate(*label_image_ptr, dilated, kernel);
+  auto groundCloud = Cloud::Ptr(new Cloud);  
   for (int r = 0; r < dilated.rows; ++r)
   {
       for (int c = 0; c < dilated.cols; ++c)
@@ -129,11 +130,12 @@ Mat DepthGroundRemover::ZeroOutGroundBFS(const Cloud& cloud,const cv::Mat& image
               for (const auto& point_idx : point_container.points())
               {
                   const auto& point = cloud.points()[point_idx];
-                  _groundClusters->push_back(point);
+                  groundCloud->push_back(point);
               }
           }
       }
   }
+  *_groundClusters = *groundCloud;
 //  std::cout << "groundcloud size:" << _groundClusters->size() << std::endl;
   return res;
 }
